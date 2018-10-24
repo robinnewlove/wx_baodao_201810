@@ -1,0 +1,13 @@
+<!--index.wxml-->
+<view class="wrap">
+    <image class="image"
+               mode="scaleToFill"
+               src="../../images/index.jpg"></image>
+    <button
+        class="button"
+        open-type="getUserInfo"
+        bindgetuserinfo="bindGetUserInfo"
+    ></button>
+</view>
+
+

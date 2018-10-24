@@ -1,0 +1,47 @@
+<!--index.wxml-->
+<view class="container">
+    <image class="image"
+                   mode="scaleToFill"
+                   src="../../images/main.jpg"></image>
+
+     <view class="total">已有<text>99999</text>人瓜分成功</view>
+
+     <view class="infobox">
+        <view class="title">还差<text>1</text>人，即可瓜分</view>
+        <view class="clock">倒计时 23:21:04</view>
+        <view>
+            <view class="userlist">
+                <view class='userhead'></view>
+                <text>昵称</text>
+            </view>
+            <view class="userlist">
+                 <view class='userhead'></view>
+                            <text>昵称</text>
+                        </view>
+                        <view class="userlist">
+                                        <view class='userhead'></view>
+                                        <text>昵称</text>
+                                    </view>
+        </view>
+     </view>
+     <button class="btn-help" wx:if="{{btnHelp}}"></button>
+     <button class="btn-mystart" wx:if="{{btnMystart}}"></button>
+     <button class="btn-share" wx:if="{{btnShare}}" bindtap="showshare"></button>
+</view>
+<!--页面结束-->
+
+<!--分享选择层开始-->
+<view class="maskbox {{maskboxshow}}" bindtap="hideshare"></view>
+<view class="sharebox" animation="{{animationData}}">
+        <view class="sharebox-1"><button open-type="share" class="share-1"></button><text>分享给好友</text></view>
+        <view class="sharebox-2">< button bindtap="shereImgshow" class="share-2"></button><text>分享到朋友圈</text></view>
+</view>
+<!--分享选择层结束-->
+
+<view class="shareimgbox" wx:if="{{showimgbox}}">
+<view class="shareimgboxbody" style='height: {{ canvasHeight }}px;width:{{canvasWidth}}px'>
+<canvas canvas-id='myCanvas' class='canvas' style='height: {{ canvasHeight }}px;width:{{canvasWidth}}px'></canvas>
+    <button class="closeshare" bindtap="closesaveImage"></button>
+</view>
+    <button class='btn-save-local' bindtap='saveImageTap' style='width:{{canvasWidth}}px'>保存图片，去朋友圈分享</button>
+</view>
