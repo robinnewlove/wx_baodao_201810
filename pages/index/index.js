@@ -1,10 +1,14 @@
 //index.js
 import Auth                     from '../../plugins/auth.plugin'
-import Router                     from '../../plugins/router.plugin'
+import Router                   from '../../plugins/router.plugin'
+import Http                     from '../../plugins/http.plugin'
+import Toast                    from '../../plugins/toast.plugin'
+
 //获取应用实例
 const app = getApp();
 const avatarStrokeWidth = 2;
 const stringUtil = require('../../utils/stringUtil.js');
+const Tool = require('../../utils/tools.js');
 
 Page({
   data: {
@@ -13,7 +17,21 @@ Page({
     showimgbox:false,
     btnHelp:false,
     btnMystart:false,
-    btnShare:true,
+    btnShare:false,
+    rulebox:false,
+    maskbox:false,
+    btnReplay:false,
+    btnReplayTa:false,
+    btnGetCode:false,
+    allwin:0,
+    userList:[],
+    tuanNum:0,
+    listNum:0,
+    status:20006,
+    submitbox:false,
+    valTel:"",
+    valVcode:"",
+    vcode:"YYYY",
 
     //画布相关字段
     canvasHeight:"0",
@@ -34,10 +52,14 @@ Page({
     nickNameLeft:"",
     qcodeTop:"",
     qcodeWidth:0,
+    openId:null,
+    urlopenId:null,
+    visitOpenid:""
 
   },
-  onLoad: function () {
-
+  onLoad: function (e) {
+      //console.log(e.openId);
+      //console.log(Tool.getCurrentPageUrlWithArgs());
     wx.canIUse('wx.showShareMenu');
 
     let that = this;
@@ -66,18 +88,251 @@ Page({
         wx.showShareMenu({
           withShareTicket: true
         });
+
+    let _openid;
+    console.log("e.scene:"+e.scene);
+    if(e.scene){
+      //&是我们定义的参数链接方式
+      var scene = decodeURIComponent(e.scene)
+      _openid = scene;
+      //其他逻辑处理。。。。。
+    }else{
+      _openid = e.openId;
+    }
+
+    console.log("_openid:"+_openid);
+    if(_openid){
+      that.setData({
+        urlopenId:_openid,
+        openId: _openid,
+        btnHelp:true
+      });
+    }
+
   },
   // 生命周期回调—监听页面显示
   onShow () {
     Auth.getToken().then((info) => {
-      //this.firFun(info);
+      this.firFun(info);
+      this.getAllwin();
       //console.log("getToken:"+info);
-  }).catch(() => {
-      Router.push('authorization_index');
-  });
+    }).catch(() => {
+        app.globalData.reurl = Tool.getCurrentPageUrlWithArgs();
+        console.log(app.globalData.reurl);
+        Router.push('authorization_index');
+    });
   },
 
+  firFun:function (info) {
 
+    let { openId } = info;
+
+    this.setData({
+      visitOpenid: openId
+    });
+
+    if(this.data.openId){
+        if(this.data.openId == openId){
+          this.setData({
+            btnHelp:false,
+            btnShare:true
+          });
+        }
+    }else{
+      this.setData({
+        openId: openId
+      });
+    }
+
+    let options = {
+      url: 'https://werun.renlai.fun/wechat/red/user_setup',
+      data:{
+        openId:this.data.openId
+      }
+    };
+    return Http(options).then((result) => {
+      console.log(result.data)
+      if(this.data.visitOpenid == this.data.openId){
+        //用户自己访问自己的主页
+        if(result.data.errcode == 20006 || result.data.errcode == 0){
+          //进行中
+          this.setData({
+            btnShare:true
+          })
+        }else if(result.data.errcode == 20003){
+          //失败 显示再来一次
+          this.setData({
+            btnReplay:true
+          })
+        }else if(result.data.errcode == 20005){
+          //成功
+          this.setData({
+            btnGetCode:true
+          })
+        }
+      }else{
+        //用户访问TA的主页
+        if(result.data.errcode == 20006 || result.data.errcode == 0 ){
+          //进行中  判断 是否助力过
+            console.log(this.data.visitOpenid)
+            console.log(result.data.data.userList)
+
+            var inArray = function(arr, item) {
+                for(var i = 0; i < arr.length; i++) {
+                    if(arr[i].openId == item) {
+                        return true;
+                    }
+                }
+                return false;
+            };
+            console.log("this.data.visitOpenid:"+ this.data.visitOpenid)
+
+          if (inArray(result.data.data.userList,this.data.visitOpenid)){                 //判断age是否存在于obj里面
+            this.setData({
+              btnHelp:true,
+              btnShare:true
+            });
+          }else{
+            console.log('没有助力过')
+          }
+        }else if(result.data.errcode == 20003){
+          //失败 显示 我也要开团
+          this.setData({
+            btnReplayTa:true
+          })
+        }else if(result.data.errcode == 20005){
+          //成功
+          this.setData({
+            btnGetCode:true
+          })
+        }
+      }
+      //console.log(result.data.errcode)
+      this.setData({
+        userList:result.data.data.userList,
+        tuanNum:3-result.data.data.userList.length,
+        listNum:result.data.data.userList.length
+      });
+    });
+  },
+  
+  getAllwin:function () {
+
+        let options = {
+          url: 'https://werun.renlai.fun/wechat/red/get_count_coupon'
+        };
+    return Http(options).then((result) => {
+      this.setData({
+         allwin:result.data.data.count
+      })
+    });
+
+  },
+  
+  helpGroup:function () {
+    let options = {
+      url: 'https://werun.renlai.fun/wechat/red/user_help',
+      data:{
+        openId:this.data.visitOpenid,
+        fromOpenId:this.data.openId
+      }
+    };
+    return Http(options).then((result) => {
+      //console.log(result.data);
+      this.setData({
+        userList:result.data.data.userList,
+        tuanNum:3-result.data.data.userList.length,
+        listNum:result.data.data.userList.length
+      });
+    });
+  },
+
+    ruleclose:function () {
+        let that = this;
+        that.setData({
+            rulebox:false,
+            maskbox: false
+        });
+    },
+
+    ruleopen:function () {
+        let that = this;
+        that.setData({
+            rulebox:true,
+            maskbox: true
+        });
+    },
+
+    getmsg:function(){
+      //获取短信验证码接口
+        console.log("valTel:"+this.data.valTel)
+        console.log("valVcode:"+this.data.valVcode)
+    },
+    getVcode:function () {
+        //获取验证码接口
+    },
+
+    formSubmit:function (e) {
+       //提交领券信息
+        console.log('form发生了submit事件，携带数据为：', e.detail.value)
+    },
+
+    btnGetCode:function () {
+        //显示表单层
+        let that = this;
+        that.setData({
+            submitbox:true,
+            maskbox: true
+        });
+    },
+    submitclose:function () {
+        //显示表单层
+        let that = this;
+        that.setData({
+            submitbox:false,
+            maskbox: true
+        });
+    },
+
+
+    valTel: function(e){
+        let that = this;
+        that.setData({
+            valTel:e.detail.value
+        });
+    },
+    valVcode: function(e){
+        let that = this;
+        that.setData({
+            valVcode:e.detail.value
+        });
+    },
+
+
+
+  //分享
+  onShareAppMessage: function (res) {
+    let that = this;
+    if (res.from === 'button') {
+      // 来自页面内转发按钮
+      //console.log(res.target)
+    }
+    return {
+      title: '快来跟我一起瓜分2100元万圣节礼包',
+      path: '/pages/index/index?openId='+that.data.openId,
+      imageUrl:'https://werun.renlai.fun/static/images/share.jpg',
+      success: function (res) {
+        console.log("shareTickets:"+res)
+        that.hideshare();
+        // console.log
+      },
+      fail: function (res) {
+        // 分享失败
+        console.log(res)
+      }
+
+    }
+  },
 
   //显示分享层
   showshare:function(){

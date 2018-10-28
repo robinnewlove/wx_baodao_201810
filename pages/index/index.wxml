@@ -4,29 +4,55 @@
                    mode="scaleToFill"
                    src="../../images/main.jpg"></image>
 
-     <view class="total">已有<text>99999</text>人瓜分成功</view>
+                   <button class="rulebtn" bindtap="ruleopen"></button>
+
+     <view class="total">已有<text>{{allwin}}</text>人瓜分成功</view>
 
      <view class="infobox">
-        <view class="title">还差<text>1</text>人，即可瓜分</view>
-        <view class="clock">倒计时 23:21:04</view>
+        <block wx:if="{{status == 20006}}">
+            <view class="title">还差<text>{{tuanNum}}</text>人，即可瓜分</view>
+            <view class="clock">倒计时 23:21:04</view>
+        </block>
+        <block wx:if="{{status == 20005}}">
+            <view class="title">礼包已被拆开</view>
+            <view class="protxt">恭喜您获得700元SAP低耗-防蓝光镜片礼券</view>
+        </block>
         <view>
-            <view class="userlist">
-                <view class='userhead'></view>
-                <text>昵称</text>
+            <view wx:for="{{userList}}" wx:key="{{nickName}}"  class="userlist">
+                <view class='userhead'>
+                    <image class="image"
+                    mode="scaleToFill"
+                    src="{{item.avatarUrl}}"></image>
+
+                </view>
+                <text class="nickname">{{item.nickName}}</text>
             </view>
-            <view class="userlist">
+
+            <view class="userlist" wx:if="{{listNum < 1}}">
                  <view class='userhead'></view>
-                            <text>昵称</text>
-                        </view>
-                        <view class="userlist">
-                                        <view class='userhead'></view>
-                                        <text>昵称</text>
-                                    </view>
+                 <text class="nickname">待邀请</text>
+            </view>
+
+            <view class="userlist" wx:if="{{listNum < 2}}">
+                 <view class='userhead'></view>
+                 <text class="nickname">待邀请</text>
+            </view>
+
+            <view class="userlist" wx:if="{{listNum < 3}}">
+                 <view class='userhead'></view>
+                 <text class="nickname">待邀请</text>
+            </view>
+
         </view>
      </view>
-     <button class="btn-help" wx:if="{{btnHelp}}"></button>
+     <button class="btn-help" wx:if="{{btnHelp}}" bindtap="helpGroup"></button>
      <button class="btn-mystart" wx:if="{{btnMystart}}"></button>
      <button class="btn-share" wx:if="{{btnShare}}" bindtap="showshare"></button>
+     <button class="btn-replay" wx:if="{{btnReplay}}"></button>
+     <button class="btn-replay-ta" wx:if="{{btnReplayTa}}"></button>
+     <button class="btn-get-code" wx:if="{{btnGetCode}}" bindtap="btnGetCode"></button>
+
+
 </view>
 <!--页面结束-->
 
@@ -45,3 +71,44 @@
 </view>
     <button class='btn-save-local' bindtap='saveImageTap' style='width:{{canvasWidth}}px'>保存图片，去朋友圈分享</button>
 </view>
+
+<!--规则弹出层-->
+<view class="rulebox" wx:if="{{rulebox}}">
+<image src="../../images/rulebg.png"></image>
+<view class="ruletxt">
+   <view class="title">活动时间：</view>
+   <view>参与活动时间：2018/10/30-2018/11/11 </view>
+   <view>礼券使用时间：2018/10/30-2018/11/30 </view>
+   <view class="title-1">活动规则：</view>
+   <view>1. 活动期间参与互动用户需授权获取个人信息（昵称、头像等），每位用户仅可成功发起一次瓜分或成功助力一次瓜分，发起与助力不可同享；</view>
+    <view>2.用户点击“马上瓜分”发起活动，24小时内邀请2位好友点击“助你瓜分”成功完成瓜分，3人均获一张700元SAP低耗-防蓝光镜片礼券； 24小时内未瓜分成功，可点击“再瓜分一个”再次发起活动；</view>
+   <view>3.参与点击“助你瓜分”好友，自活动发起24小时内，未瓜分成功，可点击“我也要开团瓜分”发起活动，邀请其好友参与；</view>
+   <view>4.用户成团后需填写手机号码并验证再领取礼券，可点击本小程序查看礼券，并在礼券使用时间内至宝岛眼镜全国门店使用，过期作废。</view>
+   <button class="close" bindtap='ruleclose'>关闭</button>
+   </view>
+</view>
+
+
+<view class="submitbox" wx:if="{{submitbox}}">
+    <view class="title">请填写信息领取礼券</view>
+    <form bindsubmit="formSubmit">
+    <view class="formbox">
+        <view>
+            <input  maxlength="11" type="number" placeholder="填写手机号" class="input-1" bindinput="valTel" name="telePhone" />
+        </view>
+        <view>
+            <input  maxlength="4" placeholder="输入右侧验证码" class="input-2" bindinput="valVcode" />
+            <view class="vcode">{{vcode}}</view>
+        </view>
+        <view>
+            <input  maxlength="4" placeholder="输入验证码" class="input-2" name="msg"  />
+            <button class="getmsg" bindtap="getmsg" >获取验证码</button>
+        </view>
+    </view>
+    <view class="btnbox">
+        <button class="btn" bindtap='submitclose'>取消</button>
+        <button class="btn" formType="submit">确认</button>
+    </view></form>
+</view>
+
+<view class="maskboxbg" wx:if="{{maskbox}}"></view>

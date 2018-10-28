@@ -45,8 +45,8 @@ class Http {
 
 
                 //this.useOpenId && (this.data.OpenId = openId);
-
-                this.url = `${this.url}?access_token=${token}`
+                var timestamp = Date.parse(new Date());
+                this.url = `${this.url}?token=${token}&&t=${timestamp}`
             }).catch(() => {}).finally(() => {
                 wx.request({
                     url: this.url,

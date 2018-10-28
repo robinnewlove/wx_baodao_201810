@@ -1,10 +1,14 @@
 {
   "pages":[
 
+
+    "pages/authorization/index",
+
     "pages/index/index",
 
-    "pages/authorization/index"
+    "pages/store/store",
 
+    "pages/card/index"
 
 
   ],

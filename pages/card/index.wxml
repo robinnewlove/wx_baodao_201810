@@ -1,0 +1,22 @@
+<view>
+    <view class="cardtop">
+        <view class="card-title">700元SAP低耗-防蓝光镜片礼券</view>
+        <image class="qcode" src="../../images/qrcode.jpg"></image>
+                <view class="text">兑换码:1235hkfhksdjh</view>
+                <view>适用门店</view>
+    </view>
+    <view class="cardcenter">
+        <view class="card-rule-title">礼券使用说明：</view>
+        <view>1.700元SAP低耗-防蓝光镜片礼券仅限购买SAP低耗-防蓝光1.55非球面防蓝光复合膜镜片；</view>
+        <view>2.需在品牌方指导价基础上抵扣，品牌方指导价及镜片度数范围以店内SAP价目册为准； </view>
+        <view>3.每人每单仅限使用一张礼券,不可与店内其他优惠同享；</view>
+        <view>4.如需配镜一般3-7天后可取镜；如需升级，请详询店内员工；</view>
+        <view>5.不可带走裸片，不可转让，不可兑换现金，礼券一经核销默认使用；</view>
+        <view>6.更多详情可详询店内员工。</view>
+    </view>
+    <view>
+        <image class="image"
+                           mode="scaleToFill"
+                           src="../../images/card-bottom-bg.jpg"></image>
+    </view>
+</view>

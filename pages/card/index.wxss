@@ -1,0 +1,13 @@
+.image{width:750rpx;height:637rpx;display: block}
+
+.cardtop{background: url("http://www.zhenzhezixun.com/images/card-top-bg.jpg");width:750rpx;height:756rpx;background-size: 100% auto; text-align: center}
+
+.cardtop .text{font-size: 24rpx}
+
+.cardcenter{background: url("http://www.zhenzhezixun.com/images/card-center-bg.jpg");width:750rpx;height:555rpx;background-size: 100% auto; font-size: 24rpx;padding:20rpx 50rpx; box-sizing: border-box;line-height: 180%;}
+
+.card-rule-title{font-weight: bold;}
+
+.qcode{width:360rpx; height: 360rpx}
+
+.card-title{padding-top: 90rpx;font-size: 35rpx;}

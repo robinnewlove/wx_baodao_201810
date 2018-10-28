@@ -34,8 +34,21 @@ Page({
             return Http(options);
         }).then((result) => {
             return Auth.updateToken(result.data.data);
-        }).then(() => {
-            return Router.push('home_index');
+        }).then((result) => {
+            if(result.isCardCode == 0){
+                if(result.groupOpenId){
+                    return wx.navigateTo({url: "/pages/index/index?openId="+result.groupOpenId});
+                    app.globalData.reurl = "/pages/index/index?openId="+result.groupOpenId;
+                }
+                if(app.globalData.reurl){
+                    return wx.navigateTo({url: "/"+app.globalData.reurl});
+                }else{
+                    return Router.push('home_index');
+                    //return wx.navigateTo({url: '/pages/store/store'});
+                }
+            }else{
+                return Router.push('card_index');
+            }
         }).catch((err) => {
             Toast.error(err);
         })
