@@ -117,7 +117,6 @@ Page({
   },
   // 生命周期回调—监听页面显示
   onShow () {
-      console.log('进入页面开始')
     Auth.getToken().then((info) => {
         console.log('授权成功');
         console.log(info);
@@ -257,7 +256,7 @@ Page({
     return Http(options).then((result) => {
       console.log(result.data);
 
-        if(result.data.errcode == 20006){
+        if(result.data.errcode == 0){
             //助力成功
 
             this.setData({
