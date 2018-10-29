@@ -39,15 +39,5 @@ Page({
             })
             //if(result.data.data.list.length)
         });
-    },
-
-
-    onShareAppMessage: function (res) {
-        let that = this;
-        return {
-            title: '步数换墨镜',
-            path: '/pages/index/index',
-            imageUrl:'https://werun.renlai.fun/static/images/share.jpg',
-        }
     }
 })

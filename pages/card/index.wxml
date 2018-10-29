@@ -1,8 +1,8 @@
 <view>
     <view class="cardtop">
         <view class="card-title">700元SAP低耗-防蓝光镜片礼券</view>
-        <image class="qcode" src="../../images/qrcode.jpg"></image>
-                <view class="text">兑换码:1235hkfhksdjh</view>
+        <image class="qcode" src="data:image/png;base64,{{base64}}"></image>
+                <view class="text">兑换码:{{code}}</view>
                 <view>适用门店</view>
     </view>
     <view class="cardcenter">

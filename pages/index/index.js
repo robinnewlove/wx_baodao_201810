@@ -6,7 +6,7 @@ import Toast                    from '../../plugins/toast.plugin'
 
 //获取应用实例
 const app = getApp();
-const avatarStrokeWidth = 2;
+const avatarStrokeWidth = 0;
 const stringUtil = require('../../utils/stringUtil.js');
 const Tool = require('../../utils/tools.js');
 
@@ -27,18 +27,19 @@ Page({
     userList:[],
     tuanNum:0,
     listNum:0,
-    status:20006,
+    status:"20006",
     submitbox:false,
     valTel:"",
     valVcode:"",
-    vcode:"YYYY",
+    vcode:"----",
+      clock:"00:00:00",
 
     //画布相关字段
     canvasHeight:"0",
     canvasWidth:"0",
-    avatar:'http://www.zhenzhezixun.com/images/logo.png',
+    avatar:'',
     bgImage: ['http://www.zhenzhezixun.com/images/sharebg.jpg'],
-    qurl:"http://www.zhenzhezixun.com/images/logo.png",
+    qurl:"",
     imgload:0,
     bgImagePath:"",
     avatarPath:"",
@@ -48,17 +49,21 @@ Page({
     avatarLeft:"",
     avatarTop:"",
     nickName:"亲爱的用户",
-    nickNameTop:"123",
+    nickNameTop:"",
     nickNameLeft:"",
     qcodeTop:"",
     qcodeWidth:0,
     openId:null,
     urlopenId:null,
-    visitOpenid:""
+    visitOpenid:"",
+
+      //弹出层
+      tiptxt:"",
+      tipshow:false
 
   },
   onLoad: function (e) {
-      //console.log(e.openId);
+      //console.log("eeeeeeeee:"+e);
       //console.log(Tool.getCurrentPageUrlWithArgs());
     wx.canIUse('wx.showShareMenu');
 
@@ -72,13 +77,13 @@ Page({
         that.setData({
           canvasWidth:res.windowWidth*0.7,
           canvasHeight:scaleNum*1334,
-          avatarWidth:scaleNum*173,
-          avatarTop:scaleNum*113,
-          avatarLeft:scaleNum*61,
-          nickNameTop:scaleNum*172,
-          nickNameLeft:scaleNum*292,
-          qcodeTop:scaleNum*1016,
-          qcodeWidth:scaleNum*250*0.8
+          avatarWidth:scaleNum*56,
+          avatarTop:scaleNum*33,
+          avatarLeft:scaleNum*32,
+          nickNameTop:scaleNum*49,
+          nickNameLeft:scaleNum*109,
+          qcodeTop:scaleNum*848,
+          qcodeWidth:scaleNum*300*0.8
         })
 
 
@@ -112,7 +117,10 @@ Page({
   },
   // 生命周期回调—监听页面显示
   onShow () {
+      console.log('进入页面开始')
     Auth.getToken().then((info) => {
+        console.log('授权成功');
+        console.log(info);
       this.firFun(info);
       this.getAllwin();
       //console.log("getToken:"+info);
@@ -130,6 +138,8 @@ Page({
     this.setData({
       visitOpenid: openId
     });
+
+      this.getUserqrcode();
 
     if(this.data.openId){
         if(this.data.openId == openId){
@@ -151,13 +161,17 @@ Page({
       }
     };
     return Http(options).then((result) => {
-      console.log(result.data)
+
+      this.getClock(result.data.data.timestamp*1000);
+      //this.getClock(10000);
+      //console.log(result.data.data.timestamp)
       if(this.data.visitOpenid == this.data.openId){
         //用户自己访问自己的主页
         if(result.data.errcode == 20006 || result.data.errcode == 0){
           //进行中
           this.setData({
-            btnShare:true
+            btnShare:true,
+              status:"20006"
           })
         }else if(result.data.errcode == 20003){
           //失败 显示再来一次
@@ -167,7 +181,8 @@ Page({
         }else if(result.data.errcode == 20005){
           //成功
           this.setData({
-            btnGetCode:true
+            btnGetCode:true,
+              status:"20005"
           })
         }
       }else{
@@ -188,6 +203,7 @@ Page({
             console.log("this.data.visitOpenid:"+ this.data.visitOpenid)
 
           if (inArray(result.data.data.userList,this.data.visitOpenid)){                 //判断age是否存在于obj里面
+              console.log('助力过')
             this.setData({
               btnHelp:true,
               btnShare:true
@@ -203,7 +219,8 @@ Page({
         }else if(result.data.errcode == 20005){
           //成功
           this.setData({
-            btnGetCode:true
+            btnGetCode:true,
+              status:"20005"
           })
         }
       }
@@ -238,12 +255,40 @@ Page({
       }
     };
     return Http(options).then((result) => {
-      //console.log(result.data);
-      this.setData({
-        userList:result.data.data.userList,
-        tuanNum:3-result.data.data.userList.length,
-        listNum:result.data.data.userList.length
-      });
+      console.log(result.data);
+
+        if(result.data.errcode == 20006){
+            //助力成功
+
+            this.setData({
+                userList:result.data.data.userList,
+                tuanNum:3-result.data.data.userList.length,
+                listNum:result.data.data.userList.length
+            });
+            if(result.data.data.userList.length == 3){
+                //满了3人处理按钮，提示语
+                this.setData({
+                    btnGetCode:true,
+                    btnHelp:false,
+                    status:"20005"
+                })
+            }else{
+                //没满3人 处理按钮
+                this.setData({
+                    btnShare:true,
+                    btnHelp:false
+                })
+            }
+            //助力成功结束
+        }else if(result.data.errcode == 20005){
+
+            this.setData({
+                tipshow:true,
+                maskbox:true,
+                tiptxt:"您已成团，不能助力；"
+            })
+        }
+
     });
   },
 
@@ -267,14 +312,70 @@ Page({
       //获取短信验证码接口
         console.log("valTel:"+this.data.valTel)
         console.log("valVcode:"+this.data.valVcode)
+
+        //https://werun.renlai.fun/wechat/red/user_sendsms
+        if(this.data.valTel&&this.data.valVcode){
+            let that = this;
+            let options = {
+                url: 'https://werun.renlai.fun/wechat/red/user_sendsms',
+                data:{
+                    openId:that.data.visitOpenid,
+                    verify:this.data.valVcode,
+                    mobile:this.data.valTel
+                }
+            };
+            return Http(options).then((result) => {
+                if(result.data.errcode != 0){
+                    Toast.error(result.data.errmsg);
+                }else{
+                    Toast.error("短信发送成功，请注意查收！");
+                }
+            })
+        }else{
+            Toast.error("手机号和验证码为必须的！");
+        }
     },
     getVcode:function () {
         //获取验证码接口
+        let that = this;
+        let options = {
+            url: 'https://werun.renlai.fun/wechat/red/get_verify_code',
+            data:{
+                openId:that.data.visitOpenid
+            }
+        };
+        return Http(options).then((result) => {
+            this.setData({
+                vcode: result.data.data.code
+            })
+        })
     },
 
     formSubmit:function (e) {
        //提交领券信息
         console.log('form发生了submit事件，携带数据为：', e.detail.value)
+
+        if(e.detail.value.telePhone != "" && e.detail.value.msg != ""){
+            let that = this;
+            let options = {
+                url: 'https://werun.renlai.fun/wechat/red/user_coupon',
+                data:{
+                    openId:that.data.visitOpenid,
+                    smscode:e.detail.value.msg,
+                    mobile:e.detail.value.telePhone
+                }
+            };
+            return Http(options).then((result) => {
+                if(result.data.errcode == 0){
+                    return Router.push('card_index');
+                }else{
+                    Toast.error(result.data.errmsg);
+                }
+            })
+        }else{
+            Toast.error("手机号和验证码为必须的！");
+        }
+
     },
 
     btnGetCode:function () {
@@ -284,13 +385,14 @@ Page({
             submitbox:true,
             maskbox: true
         });
+        that.getVcode();
     },
     submitclose:function () {
         //显示表单层
         let that = this;
         that.setData({
             submitbox:false,
-            maskbox: true
+            maskbox: false
         });
     },
 
@@ -308,6 +410,63 @@ Page({
         });
     },
 
+    getClock:function (_leftTime) {
+        var that=this;
+        var leftTime = _leftTime;
+        if(leftTime < 0){
+            leftTime = 0;
+        }
+        this.data.intervarID= setInterval(function () {
+            //计算剩余的毫秒数
+                var hours = parseInt(leftTime / 1000 / 60 / 60 % 24, 10); //计算剩余的小时
+                var minutes = parseInt(leftTime / 1000 / 60 % 60, 10);//计算剩余的分钟
+                var seconds = parseInt(leftTime / 1000 % 60, 10);//计算剩余的秒数
+                hours = that.checkTime(hours);
+                minutes = that.checkTime(minutes);
+                seconds = that.checkTime(seconds);
+                leftTime = leftTime -1000;
+
+            //console.log(hours + ":" + minutes + ":" + seconds)
+                that.setData({
+                    clock: hours + ":" + minutes + ":" + seconds
+                })
+                if (hours == '00' && minutes == '00' && seconds=='00')
+                {
+                    clearInterval(that.data.intervarID);
+                    if(that.data.visitOpenid == that.data.openId){
+                        //主人态
+                        that.setData({
+                            btnHelp:false,
+                            btnMystart:false,
+                            btnShare:false,
+                            btnReplay:true,
+                            status:"0000"
+                        });
+                    }else{
+                        that.setData({
+                            btnHelp:false,
+                            btnMystart:false,
+                            btnShare:false,
+                            btnReplayTa:true,
+                            status:"0000"
+                        });
+                    }
+                }
+            }, 1000
+        )
+    },
+
+    checkTime:function(i) { //将0-9的数字前面加上0，例1变为01
+    if (i < 10)  {
+        i = "0" + i;
+    }
+    return i;
+    },
+
+    replay:function () {
+        return Router.push('home_index');
+    },
+
 
 
   //分享
@@ -320,7 +479,7 @@ Page({
     return {
       title: '快来跟我一起瓜分2100元万圣节礼包',
       path: '/pages/index/index?openId='+that.data.openId,
-      imageUrl:'https://werun.renlai.fun/static/images/share.jpg',
+      imageUrl:'https://werun.renlai.fun/static/images/red/shareimg.jpg',
       success: function (res) {
         console.log("shareTickets:"+res)
         that.hideshare();
@@ -515,12 +674,8 @@ Page({
     const ctx = wx.createCanvasContext('myCanvas', this);
 
 
-
-
-
-
     var bgPath = that.data.bgImagePath;
-    ctx.setFillStyle("#000000");
+    ctx.setFillStyle("#734c73");
     ctx.fillRect(0, 0, that.data.canvasWidth, that.data.canvasHeight);
 
     //绘制背景图片
@@ -548,7 +703,7 @@ Page({
     //用户名
     that.setFontStyle(ctx, 'bold');
     ctx.setFillStyle("#FFFFFF");
-    ctx.setFontSize(20);
+    ctx.setFontSize(10);
     ctx.setTextAlign('left');
     ctx.setTextBaseline('top');
     ctx.fillText(stringUtil.substringStr(that.data.nickName),that.data.nickNameLeft,that.data.nickNameTop);
@@ -558,8 +713,12 @@ Page({
 
     ctx.save();
     ctx.beginPath();
-    ctx.arc(that.data.qcodeWidth/2+that.data.avatarLeft*1.1, that.data.qcodeWidth/2+that.data.qcodeTop, that.data.qcodeWidth/2*1.1, 0, 2 * Math.PI);
-    ctx.setFillStyle("#FFFFFF");
+
+      console.log('--------:'+that.data.canvasWidth);
+
+    //ctx.arc(that.data.qcodeWidth/2+that.data.avatarLeft*1.1, that.data.qcodeWidth/2+that.data.qcodeTop, that.data.qcodeWidth/2*1.1, 0, 2 * Math.PI);
+    ctx.arc(that.data.canvasWidth / 2, that.data.qcodeWidth/2+that.data.qcodeTop, that.data.qcodeWidth/2*1, 0, 2 * Math.PI);
+    ctx.setFillStyle("#ffaf00");
     ctx.fill();
     ctx.clip();
 
@@ -567,7 +726,7 @@ Page({
 
 
 
-    ctx.drawImage(that.data.qurlPath,that.data.avatarLeft+avatarStrokeWidth,that.data.qcodeTop, that.data.qcodeWidth,that.data.qcodeWidth);
+    ctx.drawImage(that.data.qurlPath,that.data.canvasWidth / 2-that.data.qcodeWidth/2+avatarStrokeWidth,that.data.qcodeTop, that.data.qcodeWidth,that.data.qcodeWidth);
 
 
 
@@ -667,6 +826,29 @@ Page({
     that.setData({
       showimgbox:false
     })
-  }
+  },
+
+    getUserqrcode:function () {
+        let that = this;
+
+        let options = {
+            url: 'https://werun.renlai.fun/wechat/red/get_user_qrcode',
+            data:{
+                openId:that.data.visitOpenid
+            }
+        };
+        return Http(options).then((result) => {
+            if(result.data.errcode == 0){
+                that.setData({
+                    qurl:result.data.data.qrcode,
+                    avatar:result.data.data.avatarUrl,
+                    nickName:result.data.data.nickName
+                })
+            }else{
+                Toast.error(result.data.errmsg);
+            }
+        });
+
+    },
 
 })

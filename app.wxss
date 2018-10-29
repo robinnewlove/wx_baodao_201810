@@ -2174,3 +2174,9 @@ Af8AABu5AAAAAFmNhQA=) format('woff');
   font-weight: normal;
   font-style: normal;
 }
+
+
+
+page {
+  background-color: #b589a2;
+}

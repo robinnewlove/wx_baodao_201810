@@ -5,14 +5,16 @@
     "pages/authorization/index",
 
     "pages/index/index",
+    "pages/card/index",
 
-    "pages/store/store",
+    "pages/store/store"
 
-    "pages/card/index"
+
 
 
   ],
   "window":{
+    "backgroundColor":"#b589a2",
     "backgroundTextStyle":"light",
     "navigationBarBackgroundColor": "#fff",
     "navigationBarTitleText": "WeChat",

@@ -11,11 +11,15 @@
      <view class="infobox">
         <block wx:if="{{status == 20006}}">
             <view class="title">还差<text>{{tuanNum}}</text>人，即可瓜分</view>
-            <view class="clock">倒计时 23:21:04</view>
+            <view class="clock">倒计时 {{clock}}</view>
         </block>
-        <block wx:if="{{status == 20005}}">
+        <block wx:if="{{status == '20005'}}">
             <view class="title">礼包已被拆开</view>
             <view class="protxt">恭喜您获得700元SAP低耗-防蓝光镜片礼券</view>
+        </block>
+        <block wx:if="{{status == '0000'}}">
+                    <view class="title">很遗憾</view>
+                    <view class="protxt">礼包未能拆开</view>
         </block>
         <view>
             <view wx:for="{{userList}}" wx:key="{{nickName}}"  class="userlist">
@@ -48,8 +52,8 @@
      <button class="btn-help" wx:if="{{btnHelp}}" bindtap="helpGroup"></button>
      <button class="btn-mystart" wx:if="{{btnMystart}}"></button>
      <button class="btn-share" wx:if="{{btnShare}}" bindtap="showshare"></button>
-     <button class="btn-replay" wx:if="{{btnReplay}}"></button>
-     <button class="btn-replay-ta" wx:if="{{btnReplayTa}}"></button>
+     <button class="btn-replay" wx:if="{{btnReplay}}" bindtap="replay"></button>
+     <button class="btn-replay-ta" wx:if="{{btnReplayTa}}" bindtap="replay"></button>
      <button class="btn-get-code" wx:if="{{btnGetCode}}" bindtap="btnGetCode"></button>
 
 
@@ -112,3 +116,9 @@
 </view>
 
 <view class="maskboxbg" wx:if="{{maskbox}}"></view>
+
+
+<view class="tipbox" wx:if="{{tipshow}}">
+    <view class="tiptxt">{{tiptxt}}</view>
+    <view class="tipbtnbox"><button class="tipbtn">确认</button></view>
+</view>

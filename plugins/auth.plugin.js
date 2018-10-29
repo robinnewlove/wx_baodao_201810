@@ -6,6 +6,8 @@ export default {
     // 获取存储的用户相关信息
     getToken: () => new Promise((resolve, reject) => {
         let userToken = wx.getStorageSync($USER_TOKEN);
+        console.log("userToken");
+        console.log("userToken:"+userToken);
         if (userToken) resolve(userToken);
         else reject('userToken is undefined');
     }),
